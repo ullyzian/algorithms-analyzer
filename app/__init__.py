@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication
 
-from app.controllers.main_controller import MainController
-from app.models.model import Model
+from app.controllers import MainController
+from app.models import Model
 from app.views.main_view import MainView
 
 

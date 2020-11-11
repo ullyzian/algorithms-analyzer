@@ -29,6 +29,7 @@ class UiMainWindow:
         self.graph = None
         self.table = None
 
+
         # Settings
         self.settingsLabel = QtWidgets.QLabel("Ustawenia")
         self.settingsLabel.setFont(QtGui.QFont('Arial', 18))
@@ -144,50 +145,54 @@ class UiMainWindow:
         self.presentationLayout.addWidget(self.graph)
 
         # Evaluate string to float type
-        size = numpy.array(data["size"]).astype(numpy.float)
-        calculatedTime = numpy.array(data["calculated_time"]).astype(numpy.float)
-        estimatedTime = numpy.array(data["estimated_time"]).astype(numpy.float)
-        memory = numpy.array(data["memory"]).astype(numpy.float)
+        self.size = numpy.array(data["size"]).astype(numpy.float)
+        self.calculatedTime = numpy.array(data["calculated_time"]).astype(numpy.float)
+        self.estimatedTime = numpy.array(data["estimated_time"]).astype(numpy.float)
+        self.memory = numpy.array(data["memory"]).astype(numpy.float)
 
         # Creates 3 graph for
         # X: Calculated time, Y: Size
         # X: Estimated time, Y: Size
         # X: Memory, Y: Size
-        self.calcTimePlot = self.plot(size, calculatedTime, plotname="Koszt czasowy (pomiar), us",
-                                      color=lineColor, width=lineWeight, style=lineStyle)
-        self.estimTimePlot = self.plot(size, estimatedTime, plotname="Koszt czasowy (pomiar), us",
-                                       color="#FF0000", width=lineWeight)
-        self.memoryPlot = self.plot(size, memory, plotname="Koszt pamięci, O(n)", color="#00FF00",
-                                    width=lineWeight)
+        self.calcTimePen = pyqtgraph.mkPen(color=lineColor, width=lineWeight, style=lineStyle)
+        self.calcTimePlot = self.graph.plot(self.size, self.calculatedTime,
+                                            name="Koszt czasowy (pomiar), us",
+                                            pen=self.calcTimePen)
+        self.estimTimePen = pyqtgraph.mkPen(color="#FF0000", width=lineWeight,
+                                            style=QtCore.Qt.SolidLine)
+        self.estimTimePlot = self.graph.plot(self.size, self.estimatedTime,
+                                             name="Koszt czasowy (wzór), O(n)",
+                                             pen=self.estimTimePen)
+        self.memoryPen = pyqtgraph.mkPen(color="#00FF00", width=lineWeight,
+                                         style=QtCore.Qt.SolidLine)
+        self.memoryPlot = self.graph.plot(self.size, self.memory, name="Koszt pamięci, O(n)",
+                                          pen=self.memoryPen)
 
-        print(self.memoryPlot)
-
-    def plot(self, x, y, plotname="Plot", color="#000000", width=3, style=QtCore.Qt.SolidLine,
-             clear=False):
-        pen = pyqtgraph.mkPen(color=color, width=width, style=style)
-        return self.graph.plot(x, y, name=plotname, pen=pen, clear=clear)
-
-    def updatePlots(self, data, lineColor="#000000", backgroundColor="#ffffff", lineWeight=3,
+    def updatePlots(self, lineColor="#000000", backgroundColor="#ffffff", lineWeight=3,
                     lineStyle=QtCore.Qt.SolidLine):
         self.graph.setBackground(backgroundColor)
-        # Evaluate string to float type
-        size = numpy.array(data["size"]).astype(numpy.float)
-        calculatedTime = numpy.array(data["calculated_time"]).astype(numpy.float)
-        estimatedTime = numpy.array(data["estimated_time"]).astype(numpy.float)
-        memory = numpy.array(data["memory"]).astype(numpy.float)
+        self.calcTimePen = pyqtgraph.mkPen(color=lineColor, width=lineWeight, style=lineStyle)
+        self.estimTimePen = pyqtgraph.mkPen(color="#FF0000", width=lineWeight,
+                                            style=QtCore.Qt.SolidLine)
+        self.memoryPen = pyqtgraph.mkPen(color="#00FF00", width=lineWeight,
+                                         style=QtCore.Qt.SolidLine)
 
-        self.calcTimePlot = self.calcTimePlot.plot(size, calculatedTime,
-                                                   plotname="Koszt czasowy (pomiar), us",
-                                                   color=lineColor, width=lineWeight,
-                                                   style=lineStyle,
-                                                   clear=True)
-        self.estimTimePlot = self.estimTimePlot.plot(size, estimatedTime,
-                                                     plotname="Koszt czasowy (pomiar), us",
-                                                     color="#FF0000", width=lineWeight, clear=True)
-        self.memoryPlot = self.memoryPlot.plot(size, memory, plotname="Koszt pamięci, O(n)",
-                                               color="#00FF00", width=lineWeight, clear=True)
+        self.calcTimePlot = self.graph.plot(self.size, self.calculatedTime,
+                                            name="Koszt czasowy (pomiar), us",
+                                            pen=self.calcTimePen,
+                                            clear=True)
+
+        self.estimTimePlot = self.graph.plot(self.size, self.estimatedTime,
+                                             name="Koszt czasowy (wzór), O(n)",
+                                             pen=self.estimTimePen)
+        self.memoryPlot = self.graph.plot(self.size, self.memory, name="Koszt pamięci, O(n)",
+                                          pen=self.memoryPen)
 
     def resetPresentation(self):
+        if self.graph is not None and self.graph.plotItem is not None:
+            self.graph.close()
+        if self.table is not None:
+            self.table.close()
         self.presentationLayout.removeWidget(self.graph)
         self.presentationLayout.removeWidget(self.table)
 

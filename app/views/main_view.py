@@ -2,8 +2,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QMainWindow
 
-from app.controllers.main_controller import MainController
-from app.models.model import Model
+from app.controllers import MainController
+from app.models import Model
 from app.views.main_view_ui import UiMainWindow
 
 
@@ -33,6 +33,15 @@ class MainView(QMainWindow):
         )
         self._ui.showTablePresentation.clicked.connect(self.showTable)
         self._ui.showPlotPresentation.clicked.connect(self.showPlot)
+        self._model.decorations.lineColorChanged.connect(self.onDecorationsChange)
+        self._model.decorations.backgroundColorChanged.connect(self.onDecorationsChange)
+        self._model.decorations.lineWeightChanged.connect(self.onDecorationsChange)
+        self._model.decorations.lineStyleChanged.connect(self.onDecorationsChange)
+        self._model.repetitionsAmountChanged.connect(self.onRepetitionsAmountChange)
+        self._model.maxSizeChanged.connect(self.onMaxSizeChange)
+        self._model.lowerBoundChanged.connect(self.onLowerBoundChange)
+        self._model.upperBoundChanged.connect(self.onUpperBoundChange)
+        self._model.algorithmChanged.connect(self.onAlgorithmChange)
 
     @pyqtSlot()
     def showTable(self):
@@ -42,7 +51,41 @@ class MainView(QMainWindow):
     @pyqtSlot()
     def showPlot(self):
         data, title = self._model.analyze()
-        self._ui.createPlot(data, title)
+        self._ui.createPlot(data, title, lineColor=self._model.decorations.lineColor,
+                            backgroundColor=self._model.decorations.backgroundColor,
+                            lineWeight=self._model.decorations.lineWeight,
+                            lineStyle=self._model.decorations.lineStyle)
+
+    @pyqtSlot()
+    def reset(self):
+        self._model.reset()
+        self._ui.resetPresentation()
+
+    @pyqtSlot(int)
+    def onRepetitionsAmountChange(self, value):
+        self._ui.minSizeRepeatInput.setText(str(value))
+
+    @pyqtSlot(int)
+    def onMaxSizeChange(self, value):
+        self._ui.maxSizeRepeatInput.setText(str(value))
+
+    @pyqtSlot(int)
+    def onLowerBoundChange(self, value):
+        self._ui.lowerBoundInput.setText(str(value))
+
+    @pyqtSlot(int)
+    def onUpperBoundChange(self, value):
+        self._ui.upperBoundInput.setText(str(value))
+
+    @pyqtSlot(str)
+    def onAlgorithmChange(self, value):
+        self._ui.algorithmCombobox.setCurrentText(value)
+
+    def onDecorationsChange(self):
+        self._ui.updatePlots(lineColor=self._model.decorations.lineColor,
+                             backgroundColor=self._model.decorations.backgroundColor,
+                             lineWeight=self._model.decorations.lineWeight,
+                             lineStyle=self._model.decorations.lineStyle)
 
     def setColorLineAction(self):
         action = QtWidgets.QAction(' &Line color', self)
@@ -71,10 +114,10 @@ class MainView(QMainWindow):
 
     def setDashLineAction(self):
         action = QtWidgets.QAction(' &Dash', self)
-        action.triggered.connect(lambda: self._main_controllersetLineStyle("dash"))
+        action.triggered.connect(lambda: self._main_controller.setLineStyle("dash"))
         return action
 
     def resetAction(self):
         action = QtWidgets.QAction(' &Reset', self)
-        action.triggered.connect(self._model.reset)
+        action.triggered.connect(self.reset)
         return action

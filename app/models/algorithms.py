@@ -1,8 +1,9 @@
 import functools
+import math
 import random
 import time
 from abc import ABC, abstractmethod
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 
 def timer(func: Callable) -> Callable:
@@ -98,6 +99,10 @@ class Algorithm(ABC):
         """
         pass
 
+    @abstractmethod
+    def __repr__(self):
+        pass
+
 
 class BubbleSort(Algorithm):
     """
@@ -131,7 +136,7 @@ class BubbleSort(Algorithm):
         return n ** 2
 
     def __repr__(self):
-        return "Bubble sort"
+        return "Sortowanie bąbelkowe (Bubble sort)"
 
 
 class InsertionSort(Algorithm):
@@ -181,7 +186,7 @@ class InsertionSort(Algorithm):
         return count
 
     def __repr__(self):
-        return "Insertion sort"
+        return "Sortowanie wstaweniem (Insertion sort)"
 
 
 class BucketSort(InsertionSort):
@@ -228,4 +233,79 @@ class BucketSort(InsertionSort):
         return n
 
     def __repr__(self):
-        return "Bucket sort"
+        return "Sortowanie kubełkowe (Bucket sort)"
+
+
+class QuickSort(Algorithm):
+    """
+    Quick sort algorithm
+
+    Quicksort is a divide-and-conquer algorithm. It works by selecting a 'pivot' element
+    from the array and partitioning the other elements into two sub-arrays,
+    according to whether they are less than or greater than the pivot.
+    The sub-arrays are then sorted recursively.
+
+    Worst case: O(n^2)
+    Average case: O(n*log n)
+    Best case: O(n*log n) or O(n)
+    """
+
+    @timer
+    def sort(self, array: List[int]) -> int:
+        count = self.quickSort(array, 0, len(array) - 1, 0)
+        return count
+
+    def quickSort(self, array: List[int], start: int, end: int, count: int) -> int:
+        if start >= end:
+            return count
+
+        p, pCount = self.partition(array, start, end)
+        count += pCount + 1
+        count = self.quickSort(array, start, p - 1, count)
+        count = self.quickSort(array, p + 1, end, count)
+
+    def partition(self, array: List[int], start: int, end: int) -> Tuple[Union[int, Any], int]:
+        pivot = array[start]
+        low = start + 1
+        high = end
+        count = 0
+
+        while True:
+            count += 1
+            # If the current value we're looking at is larger than the pivot
+            # it's in the right place (right side of pivot) and we can move left,
+            # to the next element.
+            # We also need to make sure we haven't surpassed the low pointer, since that
+            # indicates we have already moved all the elements to their correct side of the pivot
+            while low <= high and array[high] >= pivot:
+                high = high - 1
+                count += 1
+
+            # Opposite process of the one above
+            while low <= high and array[low] <= pivot:
+                low = low + 1
+                count += 1
+
+            # We either found a value for both high and low that is out of order
+            # or low is higher than high, in which case we exit the loop
+            if low <= high:
+                array[low], array[high] = array[high], array[low]
+                # The loop continues
+            else:
+                # We exit out of the loop
+                break
+
+        array[start], array[high] = array[high], array[start]
+
+        return high, count
+
+    def analyticalTime(self, n):
+        return n * math.log(n, 10)
+
+    def __repr__(self):
+        return "Szybkie sortowanie (Quick sort)"
+
+
+# test = QuickSort(10, 100, 50)
+# # print(test.sort(test.generateArray()))
+# print(test.calculate())
