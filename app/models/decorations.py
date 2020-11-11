@@ -5,14 +5,14 @@ class Decorations(QObject):
     lineColorChanged = pyqtSignal(str)
     backgroundColorChanged = pyqtSignal(str)
     lineStyleChanged = pyqtSignal(object)
-    lineWeightChanged = pyqtSignal(int)
+    lineWidthChanged = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
         self._lineColor = "#000000"
         self._backgroundColor = "#ffffff"
         self._lineStyle = Qt.SolidLine
-        self._lineWeight = 3
+        self._lineWidth = 3
 
     @property
     def lineColor(self):
@@ -42,16 +42,16 @@ class Decorations(QObject):
         self.lineStyleChanged.emit(value)
 
     @property
-    def lineWeight(self):
-        return self._lineWeight
+    def lineWidth(self):
+        return self._lineWidth
 
-    @lineWeight.setter
-    def lineWeight(self, value):
+    @lineWidth.setter
+    def lineWidth(self, value):
         self._lineStyle = value
-        self.lineWeightChanged.emit(value)
+        self.lineWidthChanged.emit(value)
 
     def reset(self):
         self._lineColor = "#000000"
         self._backgroundColor = "#ffffff"
         self._lineStyle = Qt.SolidLine
-        self._lineWeight = 3
+        self._lineWidth = 3

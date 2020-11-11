@@ -29,10 +29,11 @@ class Algorithm(ABC):
     Abstract algorithm class
     """
 
-    def __init__(self, lowerBound: int, upperBound: int, maxSize: int) -> None:
+    def __init__(self, lowerBound: int, upperBound: int, maxSize: int, repeats: int) -> None:
         self.maxSize = maxSize
         self.lowerBound = lowerBound
         self.upperBound = upperBound
+        self.repeats = repeats
 
     def generateArray(self, size: Optional[int] = None) -> List[int]:
         """
@@ -71,7 +72,8 @@ class Algorithm(ABC):
             "estimated_time": [],
             "memory": []
         }
-        for size in range(1, self.maxSize):
+        amount = self.repeats if self.maxSize > self.repeats else self.maxSize
+        for size in range(1, amount):
             # Iterates for every size and creates records
             array = self.generateArray(size)
             period, memory = self.sort(array)
@@ -305,7 +307,6 @@ class QuickSort(Algorithm):
     def __repr__(self):
         return "Szybkie sortowanie (Quick sort)"
 
-
-# test = QuickSort(10, 100, 50)
-# # print(test.sort(test.generateArray()))
-# print(test.calculate())
+test = QuickSort(10, 100, 50)
+# print(test.sort(test.generateArray()))
+print(test.calculate())

@@ -85,11 +85,11 @@ class Model(QObject):
 
     def analyze(self) -> Union[Any, Any]:
         algorithm = self.algorithmList[self.algorithm](self.lowerBound, self.upperBound,
-                                                       self.maxSize)
+                                                       self.maxSize, self.repetitionsAmount)
         return algorithm.calculate(), algorithm.__repr__()
 
     def reset(self) -> None:
-        self._repetitionsAmount = 10
+        self._repetitionsAmount = 20
         self._maxSize = 50
         self._lowerBound = 20
         self._upperBound = 10000
