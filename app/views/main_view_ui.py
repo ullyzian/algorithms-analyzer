@@ -125,7 +125,8 @@ class UiMainWindow:
         self.table = TableView(data, rows, columns)
         self.presentationLayout.addWidget(self.table)
 
-    def createPlot(self, data, title):
+    def createPlot(self, data, title, lineColor="#000000", backgroundColor="#ffffff", lineWeight=3,
+                   lineStyle=QtCore.Qt.SolidLine):
         """
         Creates plot presentation
         """
@@ -137,6 +138,7 @@ class UiMainWindow:
         self.graph.setTitle(title, size="20pt")
         self.graph.setLabel('left', "Pomiary")
         self.graph.setLabel('bottom', "Rozmiar")
+        self.graph.setBackground(backgroundColor)
         self.graph.showGrid(x=True, y=True)
         self.graph.addLegend()
         self.presentationLayout.addWidget(self.graph)
@@ -151,11 +153,39 @@ class UiMainWindow:
         # X: Calculated time, Y: Size
         # X: Estimated time, Y: Size
         # X: Memory, Y: Size
-        self.graph.plot(size, calculatedTime, name="Koszt czasowy (pomiar), us",
-                        pen=pyqtgraph.mkPen(color="r"))
-        self.graph.plot(size, estimatedTime, name="Koszt czasowy (wzór), O(n)",
-                        pen=pyqtgraph.mkPen(color="b"))
-        self.graph.plot(size, memory, name="Koszt pamięci, O(n)", pen=pyqtgraph.mkPen(color="g"))
+        self.calcTimePlot = self.plot(size, calculatedTime, plotname="Koszt czasowy (pomiar), us",
+                                      color=lineColor, width=lineWeight, style=lineStyle)
+        self.estimTimePlot = self.plot(size, estimatedTime, plotname="Koszt czasowy (pomiar), us",
+                                       color="#FF0000", width=lineWeight)
+        self.memoryPlot = self.plot(size, memory, plotname="Koszt pamięci, O(n)", color="#00FF00",
+                                    width=lineWeight)
+
+        print(self.memoryPlot)
+
+    def plot(self, x, y, plotname="Plot", color="#000000", width=3, style=QtCore.Qt.SolidLine,
+             clear=False):
+        pen = pyqtgraph.mkPen(color=color, width=width, style=style)
+        return self.graph.plot(x, y, name=plotname, pen=pen, clear=clear)
+
+    def updatePlots(self, data, lineColor="#000000", backgroundColor="#ffffff", lineWeight=3,
+                    lineStyle=QtCore.Qt.SolidLine):
+        self.graph.setBackground(backgroundColor)
+        # Evaluate string to float type
+        size = numpy.array(data["size"]).astype(numpy.float)
+        calculatedTime = numpy.array(data["calculated_time"]).astype(numpy.float)
+        estimatedTime = numpy.array(data["estimated_time"]).astype(numpy.float)
+        memory = numpy.array(data["memory"]).astype(numpy.float)
+
+        self.calcTimePlot = self.calcTimePlot.plot(size, calculatedTime,
+                                                   plotname="Koszt czasowy (pomiar), us",
+                                                   color=lineColor, width=lineWeight,
+                                                   style=lineStyle,
+                                                   clear=True)
+        self.estimTimePlot = self.estimTimePlot.plot(size, estimatedTime,
+                                                     plotname="Koszt czasowy (pomiar), us",
+                                                     color="#FF0000", width=lineWeight, clear=True)
+        self.memoryPlot = self.memoryPlot.plot(size, memory, plotname="Koszt pamięci, O(n)",
+                                               color="#00FF00", width=lineWeight, clear=True)
 
     def resetPresentation(self):
         self.presentationLayout.removeWidget(self.graph)

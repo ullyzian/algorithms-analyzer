@@ -1,10 +1,55 @@
-import functools
-import random
-import time
-from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Union
 
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, pyqtSignal
+
+from .algorithms import BubbleSort, BucketSort, InsertionSort
+
+
+class Decorations:
+
+    def __init__(self):
+        self._lineColor = "#000000"
+        self._backgroundColor = "#ffffff"
+        self._lineStyle = "Solid"
+        self._lineWeight = "3px"
+
+    @property
+    def lineColor(self):
+        return self._lineColor
+
+    @lineColor.setter
+    def lineColor(self, value):
+        self._lineColor = value
+
+    @property
+    def backgroundColor(self):
+        return self._backgroundColor
+
+    @backgroundColor.setter
+    def backgroundColor(self, value):
+        self._backgroundColor = value
+
+    @property
+    def lineStyle(self):
+        return self._lineStyle
+
+    @lineStyle.setter
+    def lineStyle(self, value):
+        self._lineStyle = value
+
+    @property
+    def lineWeight(self):
+        return self._lineWeight
+
+    @lineWeight.setter
+    def lineWeight(self, value):
+        self._lineStyle = value
+
+    def reset(self):
+        self._lineColor = "#000000"
+        self._backgroundColor = "#ffffff"
+        self._lineStyle = "Solid"
+        self._lineWeight = "3px"
 
 
 class Model(QObject):
@@ -12,6 +57,11 @@ class Model(QObject):
     Main model for app
     Inherits from QObject to implement PyQt signals/slots mechanism
     """
+    repetitionsAmountChanged = pyqtSignal(int)
+    maxSizeChanged = pyqtSignal(int)
+    lowerBoundChanged = pyqtSignal(int)
+    upperBoundChanged = pyqtSignal(int)
+    algorithmChanged = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -28,6 +78,7 @@ class Model(QObject):
             "quick-sort": 1,
             "selection-sort": 2,
         }
+        self.decorations = Decorations()
 
     @property
     def repetitionsAmount(self) -> int:
@@ -36,6 +87,7 @@ class Model(QObject):
     @repetitionsAmount.setter
     def repetitionsAmount(self, value: int) -> None:
         self._repetitionsAmount = value
+        self.repetitionsAmountChanged.emit(value)
 
     @property
     def maxSize(self) -> int:
@@ -44,6 +96,7 @@ class Model(QObject):
     @maxSize.setter
     def maxSize(self, value: int) -> None:
         self._maxSize = value
+        self.maxSizeChanged.emit(value)
 
     @property
     def lowerBound(self) -> int:
@@ -52,6 +105,7 @@ class Model(QObject):
     @lowerBound.setter
     def lowerBound(self, value):
         self._lowerBound = value
+        self.lowerBoundChanged.emit(value)
 
     @property
     def upperBound(self) -> int:
@@ -60,6 +114,7 @@ class Model(QObject):
     @upperBound.setter
     def upperBound(self, value: int) -> None:
         self._upperBound = value
+        self.upperBoundChanged.emit(value)
 
     @property
     def algorithm(self) -> str:
@@ -68,6 +123,7 @@ class Model(QObject):
     @algorithm.setter
     def algorithm(self, value: str) -> None:
         self._algorithm = value
+        self.algorithmChanged.emit(value)
 
     @property
     def algorithmList(self) -> dict:
@@ -84,230 +140,5 @@ class Model(QObject):
         self._lowerBound = 20
         self._upperBound = 10000
         self._algorithm = "bucket-sort"
+        self.decorations.reset()
         print("Reseted")
-
-
-def timer(func: Callable) -> Callable:
-    """
-    Timer decorator which measures time execution and returns cycles count from function
-    :param func: Basically, sort function
-    :return: return function wrapper, which return time and memory
-    """
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        start = time.perf_counter()
-        memory = func(*args, **kwargs)
-        end = time.perf_counter()
-        period = end - start
-        return period, memory
-
-    return wrapper
-
-
-class Algorithm(ABC):
-    """
-    Abstract algorithm class
-    """
-
-    def __init__(self, lowerBound: int, upperBound: int, maxSize: int) -> None:
-        self.maxSize = maxSize
-        self.lowerBound = lowerBound
-        self.upperBound = upperBound
-
-    def generateArray(self, size: Optional[int] = None) -> List[int]:
-        """
-        Generate max sized or given sized array of integers in bounds
-        :param size: Size of array
-        :return: list of random integers
-        """
-        if size is None:
-            return [random.randrange(self.lowerBound, self.upperBound) for _ in range(self.maxSize)]
-        else:
-            return [random.randrange(self.lowerBound, self.upperBound) for _ in range(size)]
-
-    def formatMeasurements(self, period: float, size: int, memory: int) -> Dict[str, str]:
-        """
-        Format all measurements into dict
-        :param period: Time delta of algorithm execution
-        :param size: Size of array
-        :param memory: Amount of cycles executed
-        :return: Dict of measurements
-        """
-        return {
-            "size": f"{size}",
-            "calculated_time": f"{period * 1000000:.2f}",
-            "estimated_time": f"{self.analyticalTime(size)}",
-            "memory": f"{memory}"
-        }
-
-    def calculate(self) -> Dict[str, List[str]]:
-        """
-        Calculates from 1 to MaxSize records for more accuracy
-        :return: Dict of calculated records
-        """
-        data = {
-            "size": [],
-            "calculated_time": [],
-            "estimated_time": [],
-            "memory": []
-        }
-        for size in range(1, self.maxSize):
-            # Iterates for every size and creates records
-            array = self.generateArray(size)
-            period, memory = self.sort(array)
-            for key, value in self.formatMeasurements(period, size, memory).items():
-                data[key].append(value)
-
-        return data
-
-    @abstractmethod
-    def sort(self, array: List[int]) -> int:
-        """
-        Implement sorting algorithm, which mutating and sorting array.
-        :param array: List of random integers
-        :return: Amount of cycles counted
-        """
-        pass
-
-    @abstractmethod
-    def analyticalTime(self, n) -> int:
-        """
-        Implement average O(n) analytical time
-        For example, Bubble Sort: O(n^2)
-        :param n: Size of array
-        :return: Analytical time complexity
-        """
-        pass
-
-
-class BubbleSort(Algorithm):
-    """
-    Bubble sort algorithm
-
-    Bubble sort is a sorting algorithm that works by repeatedly stepping through
-    lists that need to be sorted, comparing each pair of adjacent items and swapping
-    them if they are in the wrong order. This passing procedure is repeated until no swaps are
-    required, indicating that the list is sorted
-
-    Worst case: O(n^2)
-    Average case: O(n^2)
-    Best case: O(n) or O(1)
-    """
-
-    @timer
-    def sort(self, array):
-        has_swapped = True
-        count = 0
-
-        while has_swapped:
-            has_swapped = False
-            for i in range(len(array) - 1):
-                count += 1
-                if array[i] > array[i + 1]:
-                    array[i], array[i + 1] = array[i + 1], array[i]
-                    has_swapped = True
-        return count
-
-    def analyticalTime(self, n):
-        return n ** 2
-
-    def __repr__(self):
-        return "Bubble sort"
-
-
-class InsertionSort(Algorithm):
-    """
-    Insertion sort algorithm
-
-    Insertion sort iterates, consuming one input element each repetition,
-    and growing a sorted output list. At each iteration, insertion sort removes
-    one element from the input data, finds the location it belongs within the sorted list,
-    and inserts it there. It repeats until no input elements remain
-
-    Worst case: O(n^2)
-    Average case: O(n^2)
-    Best case: O(n) or O(1)
-    """
-
-    @timer
-    def sort(self, array):
-        count = self.insertionSort(array)
-        return count
-
-    def analyticalTime(self, n):
-        return n ** 2
-
-    def insertionSort(self, array: List[int]) -> int:
-        """
-        Implementation of "sort" method, instead of implementing directly in abstract
-        class, for make it possible to Inherit as a parent for Bucket Sort,
-        which use Insertion algorithm
-
-        :param array: Array of random integers
-        :return: Amount of cycles executed
-        """
-        count = 0
-        for index in range(1, len(array)):
-            currentValue = array[index]
-            currentIndex = index
-
-            while currentIndex > 0 and array[currentIndex - 1] > currentValue:
-                array[currentIndex] = array[currentIndex - 1]
-                currentIndex -= 1
-                count += 1
-            else:
-                count += 1
-
-            array[currentIndex] = currentValue
-        return count
-
-    def __repr__(self):
-        return "Insertion sort"
-
-
-class BucketSort(InsertionSort):
-    """
-    Bucket sort algorithm
-
-    Its inherits from Insertions sort to use sorting under buckets
-
-    Bucket sort, or bin sort, is a sorting algorithm that works by distributing
-    the elements of an array into a number of buckets.
-    Each bucket is then sorted individually, either using a different sorting algorithm,
-    or by recursively applying the bucket sorting algorithm
-
-    Worst case: O(n^2)
-    Average case: O(n + n^2 / k + k) where k is number of buckets
-                  O(n) if n ~= k
-    """
-
-    @timer
-    def sort(self, array):
-        maxValue = max(array)
-        size = maxValue / len(array)
-        count = 0
-
-        buckets = []
-        for _ in array:
-            buckets.append([])
-            count += 1
-
-        for index in range(len(array)):
-            el = int(array[index] / size)
-            count += 1
-            if el != len(array):
-                buckets[el].append(array[index])
-            else:
-                buckets[len(array) - 1].append(array[index])
-
-        for index in range(len(array)):
-            count += self.insertionSort(buckets[index]) + 1
-
-        return count
-
-    def analyticalTime(self, n):
-        return n
-
-    def __repr__(self):
-        return "Bucket sort"

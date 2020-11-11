@@ -1,3 +1,4 @@
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QObject, pyqtSlot
 
 from app.models.model import Model
@@ -9,15 +10,33 @@ class MainController(QObject):
 
         self._model = model
 
+    @pyqtSlot()
+    def setLineColor(self):
+        color = QtWidgets.QColorDialog.getColor()
+
+        if color.isValid():
+            self._model.decorations.lineColor = color.name()
+
+    @pyqtSlot()
+    def setBackgroundColor(self):
+        color = QtWidgets.QColorDialog.getColor()
+
+        if color.isValid():
+            self._model.decorations.backgroundColor = color.name()
+
+    @pyqtSlot(str)
+    def setLineStyle(self, style):
+        styles = {
+            "solid": QtCore.Qt.SolidLine,
+            "dot": QtCore.Qt.DotLine,
+            "dash": QtCore.Qt.DashLine,
+            "dash-dot": QtCore.Qt.DashDotLine
+        }
+        self._model.decorations.lineStyle = styles[style]
+
     @pyqtSlot(int)
-    def change_amount(self, value):
-        self._model.amount = value
-
-        # calculate even or odd
-        self._model.even_odd = 'odd' if value % 2 else 'even'
-
-        # calculate button enabled state
-        self._model.enable_reset = True if value else False
+    def setLineWeight(self, weight):
+        self._model.decorations.lineWeight = weight
 
     def defaultParse(self, value):
         if value == '':
@@ -31,14 +50,18 @@ class MainController(QObject):
             else:
                 return True
 
+    @pyqtSlot(str)
     def changeRepetitionsAmount(self, value):
         if self.defaultParse(value):
             self._model.repetitionsAmount = int(value)
 
+
+    @pyqtSlot(str)
     def changeMaxSize(self, value):
         if self.defaultParse(value):
             self._model.maxSize = int(value)
 
+    @pyqtSlot(str)
     def changeLowerBound(self, value):
         if self.defaultParse(value):
             if self._model.upperBound <= int(value):
@@ -46,6 +69,7 @@ class MainController(QObject):
             else:
                 self._model.lowerBound = int(value)
 
+    @pyqtSlot(str)
     def changeUpperBound(self, value):
         if self.defaultParse(value):
             if self._model.lowerBound >= int(value):
@@ -53,6 +77,7 @@ class MainController(QObject):
             else:
                 self._model.upperBound = int(value)
 
+    @pyqtSlot(str)
     def changeAlgorithm(self, value):
         if not isinstance(value, str):
             print("Given non str type")

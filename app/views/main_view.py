@@ -1,5 +1,3 @@
-from functools import partial
-
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QMainWindow
@@ -36,56 +34,47 @@ class MainView(QMainWindow):
         self._ui.showTablePresentation.clicked.connect(self.showTable)
         self._ui.showPlotPresentation.clicked.connect(self.showPlot)
 
-    @pyqtSlot(bool)
-    def on_enable_reset_changed(self, value):
-        # self._ui.pushButton_reset.setEnabled(value)
-        pass
-
+    @pyqtSlot()
     def showTable(self):
         data, _ = self._model.analyze()
         self._ui.createTable(data, len(list(data.values())[0]), len(data))
 
+    @pyqtSlot()
     def showPlot(self):
         data, title = self._model.analyze()
         self._ui.createPlot(data, title)
 
     def setColorLineAction(self):
         action = QtWidgets.QAction(' &Line color', self)
-        action.triggered.connect(self.openColorDialog)
-        return action
-
-    def setSolidLineAction(self):
-        action = QtWidgets.QAction(' &Solid', self)
-        action.triggered.connect(partial(print, "Solid selected"))
-        return action
-
-    def setDotLineAction(self):
-        action = QtWidgets.QAction(' &Dot', self)
-        action.triggered.connect(partial(print, "Dot selected"))
-        return action
-
-    def setDashDotLineAction(self):
-        action = QtWidgets.QAction(' &DashDot', self)
-        action.triggered.connect(partial(print, "DashDot selected"))
-        return action
-
-    def setDashLineAction(self):
-        action = QtWidgets.QAction(' &Dash', self)
-        action.triggered.connect(partial(print, "Dash selected"))
+        action.triggered.connect(self._main_controller.setLineColor)
         return action
 
     def setBackgroundColorAction(self):
         action = QtWidgets.QAction(' &Background color', self)
-        action.triggered.connect(self.openColorDialog)
+        action.triggered.connect(self._main_controller.setBackgroundColor)
+        return action
+
+    def setSolidLineAction(self):
+        action = QtWidgets.QAction(' &Solid', self)
+        action.triggered.connect(lambda: self._main_controller.setLineStyle("solid"))
+        return action
+
+    def setDotLineAction(self):
+        action = QtWidgets.QAction(' &Dot', self)
+        action.triggered.connect(lambda: self._main_controller.setLineStyle("dot"))
+        return action
+
+    def setDashDotLineAction(self):
+        action = QtWidgets.QAction(' &DashDot', self)
+        action.triggered.connect(lambda: self._main_controller.setLineStyle("dash-dot"))
+        return action
+
+    def setDashLineAction(self):
+        action = QtWidgets.QAction(' &Dash', self)
+        action.triggered.connect(lambda: self._main_controllersetLineStyle("dash"))
         return action
 
     def resetAction(self):
         action = QtWidgets.QAction(' &Reset', self)
         action.triggered.connect(self._model.reset)
         return action
-
-    def openColorDialog(self):
-        color = QtWidgets.QColorDialog.getColor()
-
-        if color.isValid():
-            print(color.name())
