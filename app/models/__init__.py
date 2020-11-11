@@ -2,7 +2,7 @@ from typing import Any, Union
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
-from .algorithms import BubbleSort, BucketSort, InsertionSort
+from .algorithms import BubbleSort, BucketSort, InsertionSort, QuickSort, SelectionSort
 from .decorations import Decorations
 
 
@@ -29,8 +29,8 @@ class Model(QObject):
             "bucket-sort": BucketSort,
             "bubble-sort": BubbleSort,
             "insertion-sort": InsertionSort,
-            "quick-sort": 1,
-            "selection-sort": 2,
+            "quick-sort": QuickSort,
+            "selection-sort": SelectionSort,
         }
         self.decorations = Decorations()
 
@@ -88,6 +88,16 @@ class Model(QObject):
                                                        self.maxSize, self.repetitionsAmount)
         return algorithm.calculate(), algorithm.__repr__()
 
+    def unsortedArray(self):
+        algorithm = self.algorithmList[self.algorithm](self.lowerBound, self.upperBound,
+                                                       self.maxSize, self.repetitionsAmount)
+        return algorithm.beforeSort()
+
+    def sortedArray(self):
+        algorithm = self.algorithmList[self.algorithm](self.lowerBound, self.upperBound,
+                                                       self.maxSize, self.repetitionsAmount)
+        return algorithm.afterSort()
+
     def reset(self) -> None:
         self._repetitionsAmount = 20
         self._maxSize = 50
@@ -95,4 +105,3 @@ class Model(QObject):
         self._upperBound = 10000
         self._algorithm = "bucket-sort"
         self.decorations.reset()
-        print("Reseted")

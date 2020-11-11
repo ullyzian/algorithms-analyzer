@@ -47,7 +47,7 @@ class Decorations(QObject):
 
     @lineWidth.setter
     def lineWidth(self, value):
-        self._lineStyle = value
+        self._lineWidth = value
         self.lineWidthChanged.emit(value)
 
     def reset(self):

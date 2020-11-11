@@ -1,4 +1,5 @@
 import functools
+import itertools
 import math
 import random
 import time
@@ -57,9 +58,25 @@ class Algorithm(ABC):
         return {
             "size": f"{size}",
             "calculated_time": f"{period * 1000000:.2f}",
-            "estimated_time": f"{self.analyticalTime(size)}",
+            "estimated_time": f"{self.analyticalTime(size):.2f}",
             "memory": f"{memory}"
         }
+
+    def formatArrays(self, array):
+        return {
+            "value": [str(i) for i in array]
+        }
+
+    def beforeSort(self):
+        amount = self.repeats if self.maxSize > self.repeats else self.maxSize
+        array = self.generateArray(amount)
+        return self.formatArrays(array)
+
+    def afterSort(self):
+        amount = self.repeats if self.maxSize > self.repeats else self.maxSize
+        array = self.generateArray(amount)
+        self.sort(array)
+        return self.formatArrays(array)
 
     def calculate(self) -> Dict[str, List[str]]:
         """
@@ -157,13 +174,13 @@ class InsertionSort(Algorithm):
 
     @timer
     def sort(self, array):
-        count = self.insertionSort(array)
+        count = self._insertionSort(array)
         return count
 
     def analyticalTime(self, n):
         return n ** 2
 
-    def insertionSort(self, array: List[int]) -> int:
+    def _insertionSort(self, array: List[int]) -> int:
         """
         Implementation of "sort" method, instead of implementing directly in abstract
         class, for make it possible to Inherit as a parent for Bucket Sort,
@@ -227,8 +244,10 @@ class BucketSort(InsertionSort):
                 buckets[len(array) - 1].append(array[index])
 
         for index in range(len(array)):
-            count += self.insertionSort(buckets[index]) + 1
+            count += self._insertionSort(buckets[index]) + 1
 
+        array.clear()
+        array.extend(itertools.chain(*buckets))
         return count
 
     def analyticalTime(self, n):
@@ -254,19 +273,19 @@ class QuickSort(Algorithm):
 
     @timer
     def sort(self, array: List[int]) -> int:
-        count = self.quickSort(array, 0, len(array) - 1, 0)
+        return self._quickSort(array, 0, len(array) - 1)
+
+    def _quickSort(self, array: List[int], start: int, end: int) -> int:
+        count = 0
+
+        if start < end:
+            pos, count = self._partition(array, start, end)
+            count += self._quickSort(array, start, pos - 1)
+            count += self._quickSort(array, pos + 1, end)
+
         return count
 
-    def quickSort(self, array: List[int], start: int, end: int, count: int) -> int:
-        if start >= end:
-            return count
-
-        p, pCount = self.partition(array, start, end)
-        count += pCount + 1
-        count = self.quickSort(array, start, p - 1, count)
-        count = self.quickSort(array, p + 1, end, count)
-
-    def partition(self, array: List[int], start: int, end: int) -> Tuple[Union[int, Any], int]:
+    def _partition(self, array: List[int], start: int, end: int) -> Tuple[Union[int, Any], int]:
         pivot = array[start]
         low = start + 1
         high = end
@@ -307,6 +326,46 @@ class QuickSort(Algorithm):
     def __repr__(self):
         return "Szybkie sortowanie (Quick sort)"
 
-test = QuickSort(10, 100, 50)
-# print(test.sort(test.generateArray()))
-print(test.calculate())
+
+class SelectionSort(Algorithm):
+    """
+    Selection sort algorithm
+
+    The algorithm divides the input list into two parts:
+    a sorted sublist of items which is built up from left to right at the front (left) of the list
+    and a sublist of the remaining unsorted items that occupy the rest of the list.
+    Initially, the sorted sublist is empty and the unsorted sublist is the entire input list.
+    The algorithm proceeds by finding the smallest (or largest, depending on sorting order)
+    element in the unsorted sublist, exchanging (swapping) it with the leftmost unsorted element
+    (putting it in sorted order), and moving the sublist boundaries one element to the right.
+
+    Worst case: O(n^2)
+    Average case: O(n^2)
+    Best case: O(n^2)
+    """
+
+    @timer
+    def sort(self, array: List[int]) -> int:
+        # index indicates how many items were sorted
+        count = 0
+        for index in range(len(array) - 1):
+            count += 1
+            # To find the minimum value of the unsorted segment
+            # We first assume that the first element is the lowest
+            minIndex = index
+            # We then use j to loop through the remaining elements
+            for j in range(index + 1, len(array) - 1):
+                count += 1
+                # Update the min index if the element at j is lower than it
+                if array[j] < array[minIndex]:
+                    minIndex = j
+            # After finding the lowest item of the unsorted regions,
+            # swap with the first unsorted item
+            array[index], array[minIndex] = array[minIndex], array[index]
+        return count
+
+    def analyticalTime(self, n):
+        return n ** 2
+
+    def __repr__(self):
+        return "Sortowanie selektywne (Selection sort)"

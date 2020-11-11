@@ -4,7 +4,8 @@ import numpy
 import pyqtgraph
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QIntValidator
-from PyQt5.QtWidgets import (QComboBox, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton,
+from PyQt5.QtWidgets import (QAction, QComboBox, QHBoxLayout, QHeaderView, QLabel, QLineEdit,
+                             QPushButton,
                              QSplitter,
                              QStatusBar, QTableWidget, QTableWidgetItem, QVBoxLayout,
                              QWidget)
@@ -42,27 +43,27 @@ class UiMainWindow:
 
         # Repetitions amount
         self.repetitionsAmountLabel = QLabel("Minimalna próba badawcza")
-        self.repetitionsAmountInput = QLineEdit(str(self._window._model.repetitionsAmount))
+        self.repetitionsAmountInput = StyledInput(str(self._window._model.repetitionsAmount))
         self.repetitionsAmountInput.setValidator(QIntValidator())
 
         # Max size array
         self.maxSizeLabel = QLabel("Maksymalny rozmiar sortowania tablic")
-        self.maxSizeInput = QLineEdit(str(self._window._model.maxSize))
+        self.maxSizeInput = StyledInput(str(self._window._model.maxSize))
         self.maxSizeInput.setValidator(QIntValidator())
 
         # Lower bound
         self.lowerBoundLabel = QLabel("Dolna granica predziału wartości elementów")
-        self.lowerBoundInput = QLineEdit(str(self._window._model.lowerBound))
+        self.lowerBoundInput = StyledInput(str(self._window._model.lowerBound))
         self.lowerBoundInput.setValidator(QIntValidator())
 
         # Upper bound
         self.upperBoundLabel = QLabel("Górna granica predziału wartości elementów")
-        self.upperBoundInput = QLineEdit(str(self._window._model.upperBound))
+        self.upperBoundInput = StyledInput(str(self._window._model.upperBound))
         self.upperBoundInput.setValidator(QIntValidator())
 
         # Algorithm combobox
         self.algorithmSelectLabel = QLabel("Wybierz algorytmu do analizy")
-        self.algorithmSelect = QComboBox()
+        self.algorithmSelect = StyledSelect()
         # Select items
         self.algorithmSelect.addItem("Bucket sort", "bucket-sort")
         self.algorithmSelect.addItem("Bubble sort", "bubble-sort")
@@ -77,15 +78,15 @@ class UiMainWindow:
         self.visualizationLabel = QLabel("Wizualizacja")
         self.visualizationLabel.setFont(QFont('Arial', 18))
         self.visualizationLabel.setAlignment(Qt.AlignCenter)
-        self.tableBeforeSortButton = QPushButton("Wizualizacja tablicy przed sortowaniu")
-        self.tableAfterSortButton = QPushButton("Wizualizacja tablicy po sortowaniu")
+        self.tableBeforeSortButton = StyledButton("Tablica przed sortowaniem")
+        self.tableAfterSortButton = StyledButton("Tablica po sortowaniu")
 
         # Presentation
         self.presentationLabel = QLabel("Prezentacja")
         self.presentationLabel.setFont(QFont('Arial', 18))
         self.presentationLabel.setAlignment(Qt.AlignCenter)
-        self.tablePresentationButton = QPushButton("Tabelaryczna prezentacja złożoności")
-        self.plotPresentationButton = QPushButton("Graficzna prezentacja złożoności")
+        self.tablePresentationButton = StyledButton("Tabelaryczna prezentacja złożoności")
+        self.plotPresentationButton = StyledButton("Graficzna prezentacja złożoności")
 
         # Add widgets to management layout
         self.managementLayout.addWidget(self.settingsLabel)
@@ -99,11 +100,9 @@ class UiMainWindow:
         self.managementLayout.addWidget(self.upperBoundInput)
         self.managementLayout.addWidget(self.algorithmSelectLabel)
         self.managementLayout.addWidget(self.algorithmSelect)
-        self.managementLayout.addWidget(self.splitter)
         self.managementLayout.addWidget(self.visualizationLabel)
         self.managementLayout.addWidget(self.tableBeforeSortButton)
         self.managementLayout.addWidget(self.tableAfterSortButton)
-        self.managementLayout.addWidget(self.splitter)
         self.managementLayout.addWidget(self.presentationLabel)
         self.managementLayout.addWidget(self.tablePresentationButton)
         self.managementLayout.addWidget(self.plotPresentationButton)
@@ -116,23 +115,32 @@ class UiMainWindow:
         self.menubar = self._window.menuBar()
 
         # Decorations menu
-        self.decorationsMenu = self.menubar.addMenu('&Decorations')
+        self.decorationsMenu = self.menubar.addMenu('&Dekoracje')
         self.decorationsMenu.addAction(self._window.colorLineAction())
         self.decorationsMenu.addAction(self._window.backgroundColorAction())
 
         # Line style submenu
-        self.lineStyleMenu = self.decorationsMenu.addMenu('&Line style')
+        self.lineStyleMenu = self.decorationsMenu.addMenu('&Styl linii')
         self.lineStyleMenu.addAction(self._window.solidLineAction())
         self.lineStyleMenu.addAction(self._window.dotLineAction())
         self.lineStyleMenu.addAction(self._window.dashLineAction())
         self.lineStyleMenu.addAction(self._window.dashDotLineAction())
 
+        # Line width submenu
+        self.lineWidthMenu = self.decorationsMenu.addMenu('&Grubość linii')
+        for i in range(1, 11):
+            self.lineWidthMenu.addAction(self._window.lineWidthAction(i))
+
         # Reset menu
-        self.resetMenu = self.menubar.addMenu('&Reset')
+        self.resetMenu = self.menubar.addMenu('&Resetuj')
         self.resetMenu.addAction(self._window.resetAction())
 
         # Statusbar
         self.statusbar = QStatusBar(self._window)
+        self.statusbar.showMessage("Status: Gotowy")
+        self.statusbar.setStyleSheet(
+            "background-color: #E5E5E5; color: #000000; font-size: 16px;", )
+        self.statusbar.setFixedHeight(35)
         self._window.setStatusBar(self.statusbar)
 
     def createTable(self, data, rows, columns):
@@ -185,18 +193,19 @@ class UiMainWindow:
 
     def updatePlots(self, lineColor="#000000", backgroundColor="#ffffff", lineWidth=3,
                     lineStyle=Qt.SolidLine):
-        self.plot.setBackground(backgroundColor)
+        if self.plot:
+            self.plot.setBackground(backgroundColor)
 
-        calcTimePen = mkPen(color=lineColor, width=lineWidth, style=lineStyle)
-        self.plot.plot(self.size, self.calculatedTime, name="Koszt czasowy (pomiar), us",
-                       pen=calcTimePen, clear=True)
+            calcTimePen = mkPen(color=lineColor, width=lineWidth, style=lineStyle)
+            self.plot.plot(self.size, self.calculatedTime, name="Koszt czasowy (pomiar), us",
+                           pen=calcTimePen, clear=True)
 
-        estimTimePen = mkPen(color="#FF0000", width=lineWidth, style=Qt.SolidLine)
-        self.plot.plot(self.size, self.estimatedTime, name="Koszt czasowy (wzór), O(n)",
-                       pen=estimTimePen)
+            estimTimePen = mkPen(color="#FF0000", width=lineWidth, style=Qt.SolidLine)
+            self.plot.plot(self.size, self.estimatedTime, name="Koszt czasowy (wzór), O(n)",
+                           pen=estimTimePen)
 
-        memoryPen = mkPen(color="#00FF00", width=lineWidth, style=Qt.SolidLine)
-        self.plot.plot(self.size, self.memory, name="Koszt pamięci, O(n)", pen=memoryPen)
+            memoryPen = mkPen(color="#00FF00", width=lineWidth, style=Qt.SolidLine)
+            self.plot.plot(self.size, self.memory, name="Koszt pamięci, O(n)", pen=memoryPen)
 
     def resetPresentation(self):
         if self.plot is not None and self.plot.plotItem is not None:
@@ -207,6 +216,35 @@ class UiMainWindow:
         self.presentationLayout.removeWidget(self.table)
 
 
+class StyledButton(QPushButton):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setFixedHeight(25)
+        self.setStyleSheet(
+            "border-radius: 50px; background-color: #FCA311; border: 1px solid #FCA311; color: "
+            "#000000; font-size: 14px;"
+        )
+
+
+class StyledInput(QLineEdit):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setFixedHeight(25)
+        self.setAttribute(Qt.WA_MacShowFocusRect, False)
+        self.setStyleSheet(
+            "background-color: #ffffff; color: #000000; border-radius: 5px;"
+        )
+
+
+class StyledSelect(QComboBox):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setFixedHeight(25)
+        self.setStyleSheet(
+            "background-color: #E5E5E5; color: #000000; border: 1px solid #E5E5E5; border-radius: 3px;"
+        )
+
+
 class TableView(QTableWidget):
     def __init__(self, data, *args):
         QTableWidget.__init__(self, *args)
@@ -214,7 +252,9 @@ class TableView(QTableWidget):
         self.setData()
         self.setMinimumHeight(300)
         self.setMinimumWidth(400)
+        self.setStyleSheet("background-color: #ffffff; color: #000000")
         header = self.horizontalHeader()
+        header.setStyleSheet("font-size: 14px;")
         header.setSectionResizeMode(QHeaderView.Stretch)
 
     def updateTable(self, data):

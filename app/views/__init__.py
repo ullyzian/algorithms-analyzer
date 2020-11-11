@@ -9,6 +9,7 @@ class View(QMainWindow):
     def __init__(self, model: Model):
         super().__init__()
         self.setWindowTitle("Analizator algoritmów")
+        self.setStyleSheet("background-color: #0F1108;")
         self.setFixedSize(1000, 600)
 
         self._model = model
@@ -23,6 +24,7 @@ class View(QMainWindow):
         self.ui.lowerBoundInput.setText(str(self._model.lowerBound))
         self.ui.upperBoundInput.setText(str(self._model.upperBound))
         self.ui.algorithmSelect.setCurrentIndex(0)
+        self.ui.statusbar.showMessage("Status: Wyczyszczone")
 
     @pyqtSlot()
     def setLineColor(self):
@@ -30,6 +32,7 @@ class View(QMainWindow):
 
         if color.isValid():
             self._model.decorations.lineColor = color.name()
+            self.ui.statusbar.showMessage(f"Info: Kolor linii został zmeniony na {color.name()}")
 
     @pyqtSlot()
     def setBackgroundColor(self):
@@ -37,6 +40,7 @@ class View(QMainWindow):
 
         if color.isValid():
             self._model.decorations.backgroundColor = color.name()
+            self.ui.statusbar.showMessage(f"Info: Kolor tła został zmeniony na {color.name()}")
 
     @pyqtSlot(str)
     def setLineStyle(self, style):
@@ -47,18 +51,20 @@ class View(QMainWindow):
             "dash-dot": Qt.DashDotLine
         }
         self._model.decorations.lineStyle = styles[style]
+        self.ui.statusbar.showMessage(f"Info: Styl linii został zmeniony na {style}")
 
     @pyqtSlot(int)
     def setLineWidth(self, width):
-        self._model.decorations.lineWidth = width
+        self._model.decorations.lineWidth = int(width)
+        self.ui.statusbar.showMessage(f"Info: Grubość linii została zmeniona na {width}")
 
     def colorLineAction(self):
-        action = QAction(' &Line color', self)
+        action = QAction(' &Kolor linii', self)
         action.triggered.connect(self.setLineColor)
         return action
 
     def backgroundColorAction(self):
-        action = QAction(' &Background color', self)
+        action = QAction(' &Kolor tła', self)
         action.triggered.connect(self.setBackgroundColor)
         return action
 
@@ -82,7 +88,12 @@ class View(QMainWindow):
         action.triggered.connect(lambda: self.setLineStyle("dash"))
         return action
 
+    def lineWidthAction(self, i):
+        action = QAction(f' &{i}', self)
+        action.triggered.connect(lambda: self.setLineWidth(i))
+        return action
+
     def resetAction(self):
-        action = QAction(' &Reset', self)
+        action = QAction(' &Resetuj', self)
         action.triggered.connect(self.reset)
         return action
