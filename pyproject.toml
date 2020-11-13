@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "algoritm-analyzer"
-version = "0.1.0"
+version = "1.0.0"
 description = ""
 authors = ["ullyzian <aviev2000@icloud.com>"]
 
@@ -8,6 +8,7 @@ authors = ["ullyzian <aviev2000@icloud.com>"]
 python = "^3.8.3"
 PyQt5 = "^5.15.1"
 pyqtgraph = "^0.11.0"
+pyinstaller = "^4.0"
 
 [tool.poetry.dev-dependencies]
 

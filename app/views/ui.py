@@ -4,7 +4,7 @@ import numpy
 import pyqtgraph
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QIntValidator
-from PyQt5.QtWidgets import (QAction, QComboBox, QHBoxLayout, QHeaderView, QLabel, QLineEdit,
+from PyQt5.QtWidgets import (QComboBox, QHBoxLayout, QHeaderView, QLabel, QLineEdit,
                              QPushButton,
                              QSplitter,
                              QStatusBar, QTableWidget, QTableWidgetItem, QVBoxLayout,
@@ -35,34 +35,34 @@ class UiMainWindow:
         self.table = None
 
         # Settings label
-        self.settingsLabel = QLabel("Ustawenia")
+        self.settingsLabel = StyledLabel("Ustawenia")
         self.settingsLabel.setFont(QFont('Arial', 18))
         self.settingsLabel.setAlignment(Qt.AlignCenter)
 
         # Settings form
 
         # Repetitions amount
-        self.repetitionsAmountLabel = QLabel("Minimalna próba badawcza")
+        self.repetitionsAmountLabel = StyledLabel("Minimalna próba badawcza")
         self.repetitionsAmountInput = StyledInput(str(self._window._model.repetitionsAmount))
         self.repetitionsAmountInput.setValidator(QIntValidator())
 
         # Max size array
-        self.maxSizeLabel = QLabel("Maksymalny rozmiar sortowania tablic")
+        self.maxSizeLabel = StyledLabel("Maksymalny rozmiar sortowania tablic")
         self.maxSizeInput = StyledInput(str(self._window._model.maxSize))
         self.maxSizeInput.setValidator(QIntValidator())
 
         # Lower bound
-        self.lowerBoundLabel = QLabel("Dolna granica predziału wartości elementów")
+        self.lowerBoundLabel = StyledLabel("Dolna granica predziału wartości elementów")
         self.lowerBoundInput = StyledInput(str(self._window._model.lowerBound))
         self.lowerBoundInput.setValidator(QIntValidator())
 
         # Upper bound
-        self.upperBoundLabel = QLabel("Górna granica predziału wartości elementów")
+        self.upperBoundLabel = StyledLabel("Górna granica predziału wartości elementów")
         self.upperBoundInput = StyledInput(str(self._window._model.upperBound))
         self.upperBoundInput.setValidator(QIntValidator())
 
         # Algorithm combobox
-        self.algorithmSelectLabel = QLabel("Wybierz algorytmu do analizy")
+        self.algorithmSelectLabel = StyledLabel("Wybierz algorytmu do analizy")
         self.algorithmSelect = StyledSelect()
         # Select items
         self.algorithmSelect.addItem("Bucket sort", "bucket-sort")
@@ -75,14 +75,14 @@ class UiMainWindow:
         self.splitter = QSplitter()
 
         # Visualization
-        self.visualizationLabel = QLabel("Wizualizacja")
+        self.visualizationLabel = StyledLabel("Wizualizacja")
         self.visualizationLabel.setFont(QFont('Arial', 18))
         self.visualizationLabel.setAlignment(Qt.AlignCenter)
         self.tableBeforeSortButton = StyledButton("Tablica przed sortowaniem")
         self.tableAfterSortButton = StyledButton("Tablica po sortowaniu")
 
         # Presentation
-        self.presentationLabel = QLabel("Prezentacja")
+        self.presentationLabel = StyledLabel("Prezentacja")
         self.presentationLabel.setFont(QFont('Arial', 18))
         self.presentationLabel.setAlignment(Qt.AlignCenter)
         self.tablePresentationButton = StyledButton("Tabelaryczna prezentacja złożoności")
@@ -214,6 +214,14 @@ class UiMainWindow:
             self.table.close()
         self.presentationLayout.removeWidget(self.plot)
         self.presentationLayout.removeWidget(self.table)
+
+
+class StyledLabel(QLabel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setStyleSheet(
+            "color: #ffffff"
+        )
 
 
 class StyledButton(QPushButton):

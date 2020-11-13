@@ -78,9 +78,6 @@ class Algorithm(ABC):
         self.sort(array)
         return self.formatArrays(array)
 
-    def callback(self, array):
-        return self.formatArrays(array)
-
     def calculate(self) -> Dict[str, List[str]]:
         """
         Calculates from 1 to MaxSize records for more accuracy
