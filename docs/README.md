@@ -11,20 +11,20 @@ Mam 2 egzemplarza aplikacji: Dla MacOS i dla Windows, więc proszę ściągnąć
 
 - [Dokumentacja](#dokumentacja)
 - [Spis treści](#spis-treci)
-- [Analiza algorytmów](#analiza-algorytmw)
+- [Analiza algorytmów](#analiza-algorytmow)
   - [Bucket sort](#bucket-sort)
   - [Bubble sort](#bubble-sort)
   - [Insertion sort](#insertion-sort)
   - [Quick sort](#quick-sort)
   - [Selection sort](#selection-sort)
-- [Instrukcja uzytkowania](#instrukcja-uytkowania)
-- [Ważne punkty wdrożenia](#wane-punkty-wdroenia)
+- [Instrukcja użytkowania](#instrukcja-uzytkowania)
+- [Ważne punkty wdrożenia](#wazne-punkty-wdrozenia)
 - [Wyniki testowania](#wyniki-testowania)
 - [Wnioski z realizacji projektu](#wnioski-z-realizacji-projektu)
 - [Samoocena](#samoocena)
 
 
-## Analiza algorytmów
+## Analiza algorytmow
 
 Musiłaem zrobić tylko dwa algoritmy: Bubble sort i Bucket sort. Ale zrobilem aż pięc algorytmów (3 dodatkowych): Insertion sort, Selection sort i Quick sort.
 
@@ -153,7 +153,7 @@ Wykonany za pomocą dwóch metod: która sortuje i która dzieli listy
     Więc `t(n) ~= O(n^2)`
 
 
-## Instrukcja użytkowania
+## Instrukcja uzytkowania
 
 Po urochomeniu programu mamy taki widok
 
@@ -240,7 +240,7 @@ Można zmienić dekoracji w zakładzie menu ([opis](#instrukcja-uytkowania))
 ![Screenshot](images/tests/10.png) 
 
 
-## Ważne punkty wdrożenia
+## Wazne punkty wdrozenia
 
 Tu mam abstrakcyjną klasę bazową "Algorithm", która tworze interfejs do realizacji do wszystkich innych algoritmów. To jest biznes logika aplikacji. Bardzo ciekawe są metody `sort` i `calculate`.
 
