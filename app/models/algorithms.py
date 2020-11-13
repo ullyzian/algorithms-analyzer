@@ -1,5 +1,7 @@
 import functools
 import itertools
+from statistics import mean
+from statistics import StatisticsError
 import math
 import random
 import time
@@ -59,7 +61,7 @@ class Algorithm(ABC):
             "size": f"{size}",
             "calculated_time": f"{period * 1000000:.2f}",
             "estimated_time": f"{self.analyticalTime(size):.2f}",
-            "memory": f"{memory}"
+            "memory": f"{memory:.2f}"
         }
 
     def formatArrays(self, array):
@@ -68,14 +70,15 @@ class Algorithm(ABC):
         }
 
     def beforeSort(self):
-        amount = self.repeats if self.maxSize > self.repeats else self.maxSize
-        array = self.generateArray(amount)
+        array = self.generateArray(self.maxSize)
         return self.formatArrays(array)
 
     def afterSort(self):
-        amount = self.repeats if self.maxSize > self.repeats else self.maxSize
-        array = self.generateArray(amount)
+        array = self.generateArray(self.maxSize)
         self.sort(array)
+        return self.formatArrays(array)
+
+    def callback(self, array):
         return self.formatArrays(array)
 
     def calculate(self) -> Dict[str, List[str]]:
@@ -89,11 +92,19 @@ class Algorithm(ABC):
             "estimated_time": [],
             "memory": []
         }
-        amount = self.repeats if self.maxSize > self.repeats else self.maxSize
-        for size in range(1, amount):
+        for size in range(1, self.maxSize):
             # Iterates for every size and creates records
-            array = self.generateArray(size)
-            period, memory = self.sort(array)
+            periodArr, memoryArr = [], []
+            for repeat in range(0, self.repeats):
+                array = self.generateArray(size)
+                per, mem = self.sort(array)
+                periodArr.append(per)
+                memoryArr.append(mem)
+            try:
+                period, memory = mean(periodArr), mean(memoryArr)
+            except StatisticsError:
+                period, memory = periodArr[0], memoryArr[0]
+
             for key, value in self.formatMeasurements(period, size, memory).items():
                 data[key].append(value)
 
@@ -191,14 +202,13 @@ class InsertionSort(Algorithm):
         """
         count = 0
         for index in range(1, len(array)):
+            count += 1
             currentValue = array[index]
             currentIndex = index
 
             while currentIndex > 0 and array[currentIndex - 1] > currentValue:
                 array[currentIndex] = array[currentIndex - 1]
                 currentIndex -= 1
-                count += 1
-            else:
                 count += 1
 
             array[currentIndex] = currentValue
@@ -251,7 +261,7 @@ class BucketSort(InsertionSort):
         return count
 
     def analyticalTime(self, n):
-        return n
+        return 3 * n
 
     def __repr__(self):
         return "Sortowanie kubełkowe (Bucket sort)"
@@ -321,7 +331,7 @@ class QuickSort(Algorithm):
         return high, count
 
     def analyticalTime(self, n):
-        return n * math.log(n, 10)
+        return n * (math.log(n, 2) + 1)
 
     def __repr__(self):
         return "Szybkie sortowanie (Quick sort)"

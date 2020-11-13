@@ -267,5 +267,6 @@ class TableView(QTableWidget):
             horHeaders.append(key)
             for m, item in enumerate(self.data[key]):
                 newItem = QTableWidgetItem(item)
+                newItem.setTextAlignment(Qt.AlignCenter)
                 self.setItem(m, n, newItem)
         self.setHorizontalHeaderLabels(horHeaders)

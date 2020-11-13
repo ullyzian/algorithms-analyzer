@@ -21,9 +21,9 @@ class Model(QObject):
         super().__init__()
 
         self._repetitionsAmount = 20
-        self._maxSize = 50
-        self._lowerBound = 20
-        self._upperBound = 10000
+        self._maxSize = 100
+        self._lowerBound = 1
+        self._upperBound = 1000
         self._algorithm = "bucket-sort"
         self._algorithmList = {
             "bucket-sort": BucketSort,
@@ -83,25 +83,20 @@ class Model(QObject):
     def algorithmList(self) -> dict:
         return self._algorithmList
 
+    def initAlgorithm(self):
+        algorithm = self.algorithmList[self.algorithm](self.lowerBound, self.upperBound,
+                                                       self.maxSize, self.repetitionsAmount)
+        return algorithm
+
     def analyze(self) -> Union[Any, Any]:
-        algorithm = self.algorithmList[self.algorithm](self.lowerBound, self.upperBound,
-                                                       self.maxSize, self.repetitionsAmount)
+        algorithm = self.initAlgorithm()
+
         return algorithm.calculate(), algorithm.__repr__()
-
-    def unsortedArray(self):
-        algorithm = self.algorithmList[self.algorithm](self.lowerBound, self.upperBound,
-                                                       self.maxSize, self.repetitionsAmount)
-        return algorithm.beforeSort()
-
-    def sortedArray(self):
-        algorithm = self.algorithmList[self.algorithm](self.lowerBound, self.upperBound,
-                                                       self.maxSize, self.repetitionsAmount)
-        return algorithm.afterSort()
 
     def reset(self) -> None:
         self._repetitionsAmount = 20
-        self._maxSize = 50
-        self._lowerBound = 20
-        self._upperBound = 10000
+        self._maxSize = 100
+        self._lowerBound = 1
+        self._upperBound = 1000
         self._algorithm = "bucket-sort"
         self.decorations.reset()
