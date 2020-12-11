@@ -80,6 +80,8 @@ class UiMainWindow:
         self.visualizationLabel.setAlignment(Qt.AlignCenter)
         self.tableBeforeSortButton = StyledButton("Tablica przed sortowaniem")
         self.tableAfterSortButton = StyledButton("Tablica po sortowaniu")
+        self.tableBookBeforeSortButton = StyledButton("Sprawdzian przed sortowaniem")
+        self.tableBookAfterSortButton = StyledButton("Sprawdzian po sortowaniu")
 
         # Presentation
         self.presentationLabel = StyledLabel("Prezentacja")
@@ -103,6 +105,8 @@ class UiMainWindow:
         self.managementLayout.addWidget(self.visualizationLabel)
         self.managementLayout.addWidget(self.tableBeforeSortButton)
         self.managementLayout.addWidget(self.tableAfterSortButton)
+        self.managementLayout.addWidget(self.tableBookBeforeSortButton)
+        self.managementLayout.addWidget(self.tableBookAfterSortButton)
         self.managementLayout.addWidget(self.presentationLabel)
         self.managementLayout.addWidget(self.tablePresentationButton)
         self.managementLayout.addWidget(self.plotPresentationButton)

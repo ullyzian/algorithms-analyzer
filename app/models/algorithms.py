@@ -1,12 +1,14 @@
 import functools
 import itertools
-from statistics import mean
-from statistics import StatisticsError
 import math
 import random
 import time
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from datetime import datetime
+from statistics import StatisticsError, mean
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
 
 
 def timer(func: Callable) -> Callable:
@@ -25,6 +27,38 @@ def timer(func: Callable) -> Callable:
         return period, memory
 
     return wrapper
+
+
+@dataclass
+class Book:
+    signature: str
+    title: str
+    author: str
+    publish_date: datetime.date
+
+    def __gt__(self, book):
+        return self.title.lower() > book.title.lower()
+
+    def __lt__(self, other):
+        return self.title.lower() < other.title.lower()
+
+    def __le__(self, other):
+        return self.title.lower() <= other.title.lower()
+
+    def __eq__(self, other):
+        return self.title.lower() == other.title.lower()
+
+    def __ne__(self, other):
+        return self.title.lower() != other.title.lower()
+
+    def __ge__(self, other):
+        return self.title.lower() >= other.title.lower()
+
+    def __str__(self):
+        return str(self.title)
+
+    def __truediv__(self, other):
+        return len(self.title) / other
 
 
 class Algorithm(ABC):
@@ -49,6 +83,23 @@ class Algorithm(ABC):
         else:
             return [random.randrange(self.lowerBound, self.upperBound) for _ in range(size)]
 
+    def generateBooks(self):
+        books = [
+            Book(title="Król", author="Szczepan Twardoch", signature="9788308070956",
+                 publish_date=datetime.strptime('2020-10-28', "%Y-%m-%d")),
+            Book(title="Opowieść podręcznej", author="Margaret Atwood", signature="9788380324398",
+                 publish_date=datetime.strptime('2020-02-26', "%Y-%m-%d")),
+            Book(title="27 śmierci Toby’ego Obeda", author="Joanna Gierak-Onoszko",
+                 signature="9788365970343",
+                 publish_date=datetime.strptime('2019-05-22', "%Y-%m-%d")),
+            Book(title="Gdzie śpiewają raki", author="Delia Owens", signature="9788381392686",
+                 publish_date=datetime.strptime('2019-10-30', "%Y-%m-%d")),
+            Book(title="Siedem sióstr", author="Lucinda Riley", signature="9788381257947",
+                 publish_date=datetime.strptime('2019-11-13', "%Y-%m-%d"))
+        ]
+
+        return books
+
     def formatMeasurements(self, period: float, size: int, memory: int) -> Dict[str, str]:
         """
         Format all measurements into dict
@@ -64,10 +115,27 @@ class Algorithm(ABC):
             "memory": f"{memory:.2f}"
         }
 
-    def formatArrays(self, array):
+    def formatArrays(self, array: List[int]) -> Dict[str, List[str]]:
         return {
             "value": [str(i) for i in array]
         }
+
+    def formatBooksArray(self, array: List[Book]) -> Dict[str, List[str]]:
+        return {
+            "signature": [book.signature for book in array],
+            "title": [book.title for book in array],
+            "author": [book.author for book in array],
+            "publish_date": [book.publish_date.strftime("%Y-%m-%d") for book in array]
+        }
+
+    def booksBeforeSort(self):
+        books = self.generateBooks()
+        return self.formatBooksArray(books)
+
+    def booksAfterSort(self):
+        books = self.generateBooks()
+        self.sort(books)
+        return self.formatBooksArray(books)
 
     def beforeSort(self):
         array = self.generateArray(self.maxSize)
@@ -108,7 +176,7 @@ class Algorithm(ABC):
         return data
 
     @abstractmethod
-    def sort(self, array: List[int]) -> int:
+    def sort(self, array: List[Union[int, Book]]) -> int:
         """
         Implement sorting algorithm, which mutating and sorting array.
         :param array: List of random integers
@@ -233,7 +301,10 @@ class BucketSort(InsertionSort):
 
     @timer
     def sort(self, array):
-        maxValue = max(array)
+        if isinstance(max(array), Book):
+            maxValue = max(len(book.title) for book in array)
+        else:
+            maxValue = max(array)
         size = maxValue / len(array)
         count = 0
 

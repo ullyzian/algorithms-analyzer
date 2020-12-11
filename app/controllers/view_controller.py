@@ -28,6 +28,8 @@ class ViewController(QObject):
         self._view.ui.plotPresentationButton.clicked.connect(self.showAsyncPlot)
         self._view.ui.tableBeforeSortButton.clicked.connect(self.arrayBeforeSort)
         self._view.ui.tableAfterSortButton.clicked.connect(self.arrayAfterSort)
+        self._view.ui.tableBookBeforeSortButton.clicked.connect(self.booksBeforeSort)
+        self._view.ui.tableBookAfterSortButton.clicked.connect(self.booksAfterSort)
 
         self.tableDataChanged.connect(self.showTable)
         self.plotDataChanged.connect(self.showPlot)
@@ -77,6 +79,22 @@ class ViewController(QObject):
     def arrayAfterSort(self):
         algorithm = self._model.initAlgorithm()
         data = algorithm.afterSort()
+        self._view.ui.createTable(data, len(list(data.values())[0]), len(data))
+        self._view.ui.statusbar.showMessage(
+            f"Info: Tablica po sortowaniu {self._model.algorithm}")
+
+    @pyqtSlot()
+    def booksBeforeSort(self):
+        algorithm = self._model.initAlgorithm()
+        data = algorithm.booksBeforeSort()
+        self._view.ui.createTable(data, len(list(data.values())[0]), len(data))
+        self._view.ui.statusbar.showMessage(
+            f"Info: Tablica przed sortowaniem {self._model.algorithm}")
+
+    @pyqtSlot()
+    def booksAfterSort(self):
+        algorithm = self._model.initAlgorithm()
+        data = algorithm.booksAfterSort()
         self._view.ui.createTable(data, len(list(data.values())[0]), len(data))
         self._view.ui.statusbar.showMessage(
             f"Info: Tablica po sortowaniu {self._model.algorithm}")
