@@ -1,5 +1,7 @@
 # Algorithm Analyzer
 
+# UWAGA: Nie udało mi się skompilować program sprawdzianu, bo mam MacOs
+
 # Setup
 
 Create virtual environment and install dependencies
